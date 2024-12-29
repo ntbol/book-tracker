@@ -78,14 +78,26 @@
                     ?>
                     
                     <p><?=$isbn?></p>
-                    <button class="add-to-library-btn" data-isbn="<?=$isbn?>" data-user="<?=$user_id?>">Add to Library</button>
+
+                    <?php
+                        $added = $pdo->prepare("SELECT count(*) as num FROM library WHERE user=".$user_id." AND book=".$isbn."");
+                        $added->execute();
+                        $add = $added->fetch(PDO::FETCH_ASSOC);
+
+                        if ($add['num'] > 0):
+                    ?>
+                        <button class="add-to-library-btn" data-isbn="<?=$isbn?>" data-user="<?=$user_id?>">In library</button>
+                    <?php else: ?>
+                        <button class="add-to-library-btn" data-isbn="<?=$isbn?>" data-user="<?=$user_id?>">Add to Library</button>
+
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body" id="responseMessage">
                 
@@ -101,6 +113,8 @@
 
 
         $(document).ready(function() {
+       
+
             $('.add-to-library-btn').on('click', function() {
                 const isbn = $(this).data('isbn');
                 const userId = $(this).data('user'); // Replace with the actual logged-in user's ID
@@ -115,16 +129,19 @@
                             const result = JSON.parse(response);
                             if (result.success) {
                                 $('#responseMessage').text('Book added to library!');
+                                $('#liveToast').addClass("text-bg-success");
                                 const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
                                 toastBootstrap.show()
                             } else {
                                 $('#responseMessage').text(result.message);
+                                $('#liveToast').addClass("text-bg-secondary");
                                 const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
                                 toastBootstrap.show()
                             }
                         } catch (error) {
                             console.error('Error parsing response:', error);
                             $('#responseMessage').text('An unexpected error occurred.');
+                            $('#liveToast').addClass("text-bg-warning");
                             const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
                             toastBootstrap.show()
                         }
@@ -132,6 +149,7 @@
                     error: function(xhr, status, error) {
                         console.error('AJAX Error:', error);
                         $('#responseMessage').text('Failed to add book.');
+                        $('#liveToast').addClass("text-bg-warning");
                         const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
                         toastBootstrap.show()
                     }
