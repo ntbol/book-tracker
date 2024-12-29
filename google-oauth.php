@@ -3,13 +3,13 @@
 session_start();
 
 // Include the Facebook SDK
-require '/google-api-client/vendor/autoload.php';
+require 'google-api-client/vendor/autoload.php';
 // Include database connect
 require 'db.php';
 // Update the following variables
 $google_oauth_client_id = env('oauth_client_id');
 $google_oauth_client_secret = env('oauth_client_secret');
-$google_oauth_redirect_uri = 'http://localhost/book-tracker/logic/google-oauth.php';
+$google_oauth_redirect_uri = 'http://localhost/book-tracker/google-oauth.php';
 $google_oauth_version = 'v3';
 // Create the Google Client object
 $client = new Google_Client();
@@ -47,7 +47,7 @@ if (isset($_GET['code']) && !empty($_GET['code'])) {
             $_SESSION['google_loggedin'] = TRUE;
             $_SESSION['google_id'] = $id;
             // Redirect to profile page
-            header('Location: ../index.php');
+            header('Location: index.php');
             exit;
         } else {
             exit('Could not retrieve profile information! Please try again later!');
